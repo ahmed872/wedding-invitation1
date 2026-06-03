@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Cinematic Invitation | Wedify</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        :root {
+            --accent: #E2E8F0;
+            --dark: #050505;
+            --light: #E5E5E5;
+            --card-bg: rgba(10, 10, 10, 0.6);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Font Classes */
+        .heading { font-family: 'Cinzel', serif; }
+        .font-syncopate { font-family: 'Syncopate', sans-serif; }
+        .text-accent { color: var(--accent); }
+        
+        /* ================= PRELOADER ================= */
+        #preloader {
+            position: fixed; inset: 0; background: var(--dark);
+            z-index: 99999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .ring-loader {
+            width: 60px; height: 60px; border: 1px solid transparent;
+            border-top-color: var(--accent); border-bottom-color: var(--accent);
+            border-radius: 50%; animation: spin 2s linear infinite;
+        }
+        .ring-loader-inner {
+            width: 40px; height: 40px; border: 1px solid transparent;
+            border-left-color: rgba(226, 232, 240, 0.5); border-right-color: rgba(226, 232, 240, 0.5);
+            border-radius: 50%; animation: spin 1.5s linear infinite reverse;
+            position: absolute; top: 10px; left: 10px;
+        }
+
+        /* ================= CINEMA TICKET SCREEN ================= */
+        #envelope-screen {
+            position: fixed; inset: 0;
+            background: var(--dark);
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
+        }
+
+        #stars-canvas {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        }
+
+        .ticket-wrapper {
+            position: relative; width: 300px;
+            z-index: 10; cursor: pointer;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
+        }
+
+        @media(min-width: 640px) {
+            .ticket-wrapper { width: 360px; }
+        }
+
+        .ticket-part {
+            background: #111;
+            position: relative;
+            border: 2px solid #222;
+        }
+
+        /* Serrated/Notched edges for the ticket */
+        .ticket-top {
+            border-bottom: none; border-radius: 12px 12px 0 0;
+            padding: 50px 30px; text-align: center;
+        }
+        .ticket-bottom {
+            border-top: none; border-radius: 0 0 12px 12px;
+            padding: 30px; text-align: center;
+        }
+
+        /* The side cutouts */
+        .ticket-top::before, .ticket-top::after {
+            content: ''; position: absolute; bottom: -12px;
+            width: 24px; height: 24px; background: var(--dark);
+            border-radius: 50%; z-index: 20; border: 2px solid #222;
+        }
+        .ticket-top::before { left: -14px; border-right-color: transparent; border-top-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); border:none; box-shadow: inset -2px 0 0 #222; }
+        .ticket-top::after { right: -14px; border:none; box-shadow: inset 2px 0 0 #222; }
+        
+        .ticket-bottom::before, .ticket-bottom::after {
+            content: ''; position: absolute; top: -12px;
+            width: 24px; height: 24px; background: var(--dark);
+            border-radius: 50%; z-index: 20;
+        }
+        .ticket-bottom::before { left: -14px; box-shadow: inset -2px 0 0 #222; }
+        .ticket-bottom::after { right: -14px; box-shadow: inset 2px 0 0 #222; }
+
+        .ticket-tear-line {
+            width: 100%; height: 0;
+            border-top: 2px dashed #444;
+            position: relative; z-index: 30;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .ticket-tear-line::before, .ticket-tear-line::after {
+            content: ''; position: absolute;
+            width: 24px; height: 24px; background: var(--dark);
+            border-radius: 50%; z-index: 40;
+        }
+        .ticket-tear-line::before { left: -14px; }
+        .ticket-tear-line::after { right: -14px; }
+
+
+        .admit-btn {
+            position: absolute;
+            background: var(--light); color: var(--dark);
+            padding: 12px 24px; border-radius: 9999px;
+            text-transform: uppercase; letter-spacing: 0.2em; font-size: 10px; font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 50; border: 1px solid #fff;
+        }
+        .ticket-wrapper:hover .admit-btn {
+            box-shadow: 0 0 20px rgba(226, 232, 240, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* ================= MAIN CONTENT ================= */
+        #main-content { display: none; opacity: 0; position: relative; z-index: 10; }
+        
+        .parallax-bg {
+            background-size: cover; background-position: center; background-attachment: fixed;
+            position: relative;
+        }
+        
+        .glass-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.1);
+        }
+
+        /* Glowing Border Button */
+        .btn-glow {
+            background: transparent; color: var(--accent); border: 1px solid rgba(226, 232, 240, 0.3);
+            padding: 16px 40px; text-transform: uppercase; letter-spacing: 3px; font-size: 11px;
+            border-radius: 9999px; transition: all 0.4s ease; display: inline-block; cursor: pointer;
+            box-shadow: 0 0 0 rgba(226, 232, 240, 0);
+            backdrop-filter: blur(5px);
+        }
+        .btn-glow:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(226, 232, 240, 0.3);
+        }
+
+        /* Music Toggle */
+        .music-toggle {
+            position: fixed; bottom: 30px; right: 30px; z-index: 100;
+            width: 50px; height: 50px; border-radius: 50%; border: 1px solid rgba(226, 232, 240, 0.3);
+            background: var(--dark); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .music-toggle svg { width: 20px; height: 20px; fill: var(--light); transition: transform 0.3s; }
+        .music-toggle:hover { border-color: var(--accent); box-shadow: 0 0 15px rgba(226, 232, 240, 0.2); }
+        .music-anim { animation: spin 4s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .fade-up { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        .cd-num-fade { transition: opacity 0.4s ease; }
+
+        /* Gallery Image Filter Update */
+        .gallery-img {
+            width: 100%; height: 400px; object-fit: cover;
+            filter: grayscale(80%) brightness(0.7); transition: all 0.7s ease;
+        }
+        .gallery-img:hover {
+            filter: grayscale(0%) brightness(1.1); transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); z-index: 10; position: relative;
+        }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-[#E2E8F0] selection:text-[#050505]">
+
+    <!-- NIGHT SKY CANVAS (Global) -->
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="relative">
+            <div class="ring-loader"></div>
+            <div class="ring-loader-inner"></div>
+        </div>
+        <div class="mt-8 font-syncopate tracking-[0.3em] uppercase text-[10px] text-accent">Wedify Cinema</div>
+    </div>
+
+    <!-- AUDIO -->
+    <audio id="bg-audio" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- INTRO TICKET SCREEN -->
+    <div id="envelope-screen">
+        <div class="absolute top-16 text-center w-full z-10 fade-up visible">
+            <h3 class="font-syncopate uppercase tracking-[0.4em] text-[8px] text-gray-500 mb-2 mt-4">A Cinematic Wedding Premiere</h3>
+        </div>
+
+        <div class="ticket-wrapper" id="ticket-wrapper">
+            <!-- Ticket Top -->
+            <div class="ticket-part ticket-top" id="ticket-top">
+                <p class="font-syncopate text-[9px] tracking-[0.3em] uppercase text-gray-500 mb-8">Exclusive Premiere</p>
+                <h1 class="heading text-5xl mb-4 text-[#E5E5E5] leading-tight">Alexander<br><span class="text-3xl text-gray-600">&amp;</span><br>Elena</h1>
+                <div class="w-12 h-px bg-[#333] mx-auto my-6"></div>
+                <p class="font-syncopate text-[10px] tracking-[0.2em] text-[#E2E8F0]">Oct 25 &bull; 2024</p>
+            </div>
+            
+            <!-- Tear Line & Button -->
+            <div class="ticket-tear-line">
+                <button class="admit-btn font-syncopate" id="admit-btn">Admit One</button>
+            </div>
+
+            <!-- Ticket Bottom -->
+            <div class="ticket-part ticket-bottom" id="ticket-bottom">
+                <p class="font-syncopate text-[7px] tracking-[0.4em] text-gray-600 uppercase">Interactive Digital Experience<br><br>Scan to Enter</p>
+                <!-- Fake barcode -->
+                <div class="mt-4 flex justify-center gap-[2px] opacity-20 h-6">
+                    <div class="w-1 bg-white h-full"></div><div class="w-2 bg-white h-full"></div><div class="w-1 bg-white h-full"></div>
+                    <div class="w-1 bg-white h-full"></div><div class="w-[2px] bg-white h-full"></div><div class="w-2 bg-white h-full"></div>
+                    <div class="w-[3px] bg-white h-full"></div><div class="w-1 bg-white h-full"></div><div class="w-[1px] bg-white h-full"></div>
+                    <div class="w-2 bg-white h-full"></div><div class="w-[2px] bg-white h-full"></div><div class="w-1 bg-white h-full"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-8 text-[8px] text-gray-600 font-syncopate tracking-[0.3em] uppercase">
+            A Wedify Production
+        </div>
+    </div>
+
+    <!-- FLOATING MUSIC BUTTON -->
+    <button class="music-toggle hidden" id="music-btn" title="Toggle Music">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    </button>
+
+    <!-- ==============================================
+                     MAIN INVITATION CONTENT
+    =============================================== -->
+    <div id="main-content">
+        
+        <!-- SECTION 1: HERO PARALLAX -->
+        <section class="parallax-bg min-h-screen flex flex-col items-center justify-center p-4 md:p-6 text-center" style="background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop');">
+            <!-- Overlay to darken background -->
+            <div class="absolute inset-0 bg-gradient-to-b from-[#050505]/60 via-[#050505]/80 to-[#050505]"></div>
+            
+            <div class="relative z-10 p-8 md:p-20 max-w-4xl mx-auto mt-0 md:mt-12 fade-up">
+                <p class="font-syncopate text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-6 font-semibold">The Wedding Celebration Of</p>
+                
+                <h1 class="text-6xl md:text-8xl lg:text-9xl heading text-white mb-2 drop-shadow-2xl">Alexander</h1>
+                <h2 class="text-3xl md:text-5xl heading text-gray-500 my-4 italic">&amp;</h2>
+                <h1 class="text-6xl md:text-8xl lg:text-9xl heading text-white mb-10 drop-shadow-2xl">Elena</h1>
+                
+                <div class="w-px h-16 md:h-24 bg-gradient-to-b from-gray-500 to-transparent mx-auto mb-8"></div>
+                <p class="font-syncopate text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-gray-400 max-w-md mx-auto leading-relaxed">
+                    Invite you to share in the premiere of their forever
+                </p>
+                
+                <div class="mt-12">
+                    <button class="btn-glow font-syncopate text-[9px] md:text-[10px]">RSVP Now</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MINIMALIST COUNTDOWN -->
+        <section class="py-24 px-4 bg-[#050505] relative border-b border-[#222]">
+            <div class="max-w-5xl mx-auto text-center fade-up font-syncopate">
+                <h2 class="text-[10px] uppercase tracking-[0.4em] text-gray-500 mb-16">Time until Premiere</h2>
+                
+                <div class="flex flex-row flex-wrap justify-center items-center gap-10 md:gap-20">
+                    <div class="text-center">
+                        <div class="text-5xl md:text-8xl font-light text-[#E5E5E5] cd-num-fade mb-4" id="cd-days">00</div>
+                        <div class="w-full h-px bg-[#333] mb-4"></div>
+                        <div class="text-[8px] uppercase tracking-[0.3em] text-gray-600">Days</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl md:text-8xl font-light text-[#E5E5E5] cd-num-fade mb-4" id="cd-hours">00</div>
+                        <div class="w-full h-px bg-[#333] mb-4"></div>
+                        <div class="text-[8px] uppercase tracking-[0.3em] text-gray-600">Hours</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl md:text-8xl font-light text-[#E5E5E5] cd-num-fade mb-4" id="cd-mins">00</div>
+                        <div class="w-full h-px bg-[#333] mb-4"></div>
+                        <div class="text-[8px] uppercase tracking-[0.3em] text-gray-600">Mins</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl md:text-8xl font-light text-[#E5E5E5] cd-num-fade mb-4" id="cd-secs">00</div>
+                        <div class="w-full h-px bg-[#333] mb-4"></div>
+                        <div class="text-[8px] uppercase tracking-[0.3em] text-gray-600">Secs</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: THE COUPLE / ASYMMETRIC SPLIT SCREEN -->
+        <section class="py-24 md:py-40 px-4 md:px-10 relative bg-[#050505] overflow-hidden">
+            <div class="max-w-7xl mx-auto relative w-full">
+                
+                <div class="text-center mb-16 md:mb-32 fade-up relative z-30">
+                    <h2 class="text-[10px] font-syncopate tracking-[0.4em] uppercase text-gray-500 mb-4">The Starring Roles</h2>
+                    <h3 class="text-4xl md:text-5xl heading text-[#E5E5E5]">A Love Story</h3>
+                </div>
+
+                <div class="relative w-full h-[500px] md:h-[700px] fade-up">
+                    <!-- Groom Image - Left & Top overlapping -->
+                    <div class="absolute left-0 top-0 md:left-10 md:top-10 w-[65%] md:w-[45%] h-[60%] md:h-[70%] z-10 hover:z-30 transition-all duration-700 grayscale opacity-70 hover:opacity-100 hover:grayscale-0 group">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800" alt="Groom" class="w-full h-full object-cover">
+                        <div class="absolute -bottom-8 -right-4 md:-bottom-12 md:-right-16 bg-[#050505] border border-[#222] p-6 md:p-10 shadow-2xl transition-transform duration-500 group-hover:translate-x-2 group-hover:-translate-y-2">
+                            <h4 class="heading text-2xl md:text-4xl text-white mb-2">Alexander</h4>
+                            <p class="font-syncopate text-[8px] md:text-[10px] text-gray-500 tracking-[0.2em] uppercase">The Groom</p>
+                        </div>
+                    </div>
+
+                    <!-- Bride Image - Right & Bottom overlapping -->
+                    <div class="absolute right-0 bottom-0 md:right-10 md:bottom-10 w-[65%] md:w-[45%] h-[60%] md:h-[70%] z-20 hover:z-30 transition-all duration-700 grayscale opacity-70 hover:opacity-100 hover:grayscale-0 group">
+                        <img src="https://images.unsplash.com/photo-1541250848049-b4f71426ca91?q=80&w=800" alt="Bride" class="w-full h-full object-cover">
+                        <div class="absolute -top-8 -left-4 md:-top-12 md:-left-16 bg-[#050505] border border-[#222] p-6 md:p-10 shadow-2xl transition-transform duration-500 group-hover:-translate-x-2 group-hover:translate-y-2">
+                            <h4 class="heading text-2xl md:text-4xl text-white mb-2">Elena</h4>
+                            <p class="font-syncopate text-[8px] md:text-[10px] text-gray-500 tracking-[0.2em] uppercase">The Bride</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 4: GALLERY -->
+        <section class="py-24 px-6 bg-[#050505]">
+            <div class="max-w-6xl mx-auto fade-up">
+                <div class="flex items-center gap-6 mb-16">
+                    <div class="h-px bg-[#333] flex-1"></div>
+                    <h2 class="text-[10px] font-syncopate tracking-[0.4em] uppercase text-gray-400 px-4">Cinematography</h2>
+                    <div class="h-px bg-[#333] flex-1"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=800" class="gallery-img" alt="Gallery 1">
+                    <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800" class="gallery-img" alt="Gallery 2">
+                    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=800" class="gallery-img" alt="Gallery 3">
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: EVENT DETAILS BACKSTAGE -->
+        <section class="py-32 px-6 relative bg-[#0a0a0a] border-t border-[#111]">
+            <div class="max-w-6xl mx-auto fade-up text-center">
+                <h2 class="text-[10px] font-syncopate uppercase tracking-[0.4em] text-gray-500 mb-4">Event Script</h2>
+                <h3 class="text-4xl heading text-white mb-20 whitespace-nowrap">Behind The Scenes</h3>
+                
+                <div class="grid md:grid-cols-2 gap-10 lg:gap-16">
+                    <!-- Ceremony -->
+                    <div class="p-10 border border-[#222] bg-[#050505] text-center hover:border-gray-500 transition-colors duration-500">
+                        <h4 class="text-2xl heading text-white mb-6">Act I: The Ceremony</h4>
+                        <p class="font-syncopate text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-8">Friday, Oct 25 &bull; 4:30 PM</p>
+                        
+                        <p class="text-lg heading text-white mb-2">St. Patrick's Cathedral</p>
+                        <p class="text-xs text-gray-600 mb-10 font-sans tracking-wide">5th Avenue &amp; 50th Street, NY</p>
+                        
+                        <button class="btn-glow font-syncopate text-[8px]">View Location</button>
+                    </div>
+                    
+                    <!-- Reception -->
+                    <div class="p-10 border border-[#222] bg-[#050505] text-center hover:border-gray-500 transition-colors duration-500">
+                        <h4 class="text-2xl heading text-white mb-6">Act II: The Afterparty</h4>
+                        <p class="font-syncopate text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-8">Friday, Oct 25 &bull; 7:30 PM</p>
+                        
+                        <p class="text-lg heading text-white mb-2">The Plaza Hotel Ballroom</p>
+                        <p class="text-xs text-gray-600 mb-10 font-sans tracking-wide">768 5th Ave, NY</p>
+                        
+                        <button class="btn-glow font-syncopate text-[8px]">View Location</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: FOOTER -->
+        <section class="py-24 px-6 bg-[#050505] text-center border-t border-[#111]">
+            <div class="mt-10 opacity-50 hover:opacity-100 transition-opacity duration-500">
+                <h3 class="heading text-2xl mb-4 text-white">Wedify Cinema</h3>
+                <p class="font-syncopate text-[8px] uppercase tracking-[0.4em] text-gray-600">The End &bull; A New Beginning</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- MAIN SCRIPTS -->
+    <script>
+        // --- 1. PRELOADER & INITIALIZATION ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                preloader.style.transition = 'opacity 0.8s ease';
+                preloader.style.opacity = '0';
+                setTimeout(() => { 
+                    preloader.style.display = 'none'; 
+                }, 800);
+            }, 1200);
+        });
+
+        // --- 2. GSAP TICKET TEAR ANIMATION ---
+        const ticketWrapper = document.getElementById('ticket-wrapper');
+        let isTicketTorn = false;
+
+        document.getElementById('admit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isTicketTorn) return;
+            isTicketTorn = true;
+            
+            // Audio setup
+            const audio = document.getElementById('bg-audio');
+            const mBtn = document.getElementById('music-btn');
+            audio.volume = 0.5;
+            audio.play().catch(err => console.log('Audio Autoplay Blocked:', err));
+            mBtn.classList.remove('hidden');
+            mBtn.querySelector('svg').classList.add('music-anim');
+
+            // Tear Animation
+            const tl = gsap.timeline();
+            tl.to('#admit-btn', { opacity: 0, scale: 0.5, duration: 0.3 })
+              .to('.ticket-tear-line', { borderTopColor: 'transparent', duration: 0.1 })
+              .to('#ticket-top', { y: -window.innerHeight, rotation: -4, duration: 1.2, ease: "power2.inOut" }, "tear")
+              .to('#ticket-bottom', { y: window.innerHeight, rotation: 5, duration: 1.2, ease: "power2.inOut" }, "tear")
+              .to('#envelope-screen', { opacity: 0, duration: 0.8, delay: 0.5 }, "tear")
+              .call(() => {
+                  document.getElementById('envelope-screen').style.display = 'none';
+                  const main = document.getElementById('main-content');
+                  main.style.display = 'block';
+                  
+                  // Reveal main content
+                  gsap.to(main, { opacity: 1, duration: 1.5, ease: "power2.out" });
+                  initScrollReveals();
+              });
+        });
+
+        // --- 3. MUSIC TOGGLE ---
+        document.getElementById('music-btn').addEventListener('click', function() {
+            const audio = document.getElementById('bg-audio');
+            const icon = this.querySelector('svg');
+            if(audio.paused) {
+                audio.play(); icon.classList.add('music-anim');
+            } else {
+                audio.pause(); icon.classList.remove('music-anim');
+            }
+        });
+
+        // --- 4. TWINKLING NIGHT SKY CANVAS ---
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const starsCount = window.innerWidth > 768 ? 200 : 100;
+        const stars = Array.from({length: starsCount}).map(() => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.5 + 0.5,
+            baseOpacity: Math.random() * 0.5 + 0.1,
+            twinkleSpeed: Math.random() * 0.003 + 0.001,
+            driftX: (Math.random() - 0.5) * 0.1,
+            offset: Math.random() * Math.PI * 2
+        }));
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const now = Date.now();
+            ctx.fillStyle = '#E2E8F0';
+            
+            stars.forEach(s => {
+                // Twinkle effect using sin wave
+                const opacity = s.baseOpacity + Math.sin(now * s.twinkleSpeed + s.offset) * 0.4;
+                ctx.globalAlpha = Math.max(0, opacity);
+                
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Slow drift
+                s.x += s.driftX;
+                if(s.x > canvas.width) s.x = 0;
+                if(s.x < 0) s.x = canvas.width;
+            });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+
+        // --- 5. SCROLL REVEALS ---
+        function initScrollReveals() {
+            const reveals = document.querySelectorAll('.fade-up');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+            reveals.forEach(r => observer.observe(r));
+        }
+
+        // --- 6. MINIMALIST COUNTDOWN ---
+        const targetDate = new Date("2024-10-25T16:30:00").getTime();
+        
+        function updateCdNum(elementId, newValue) {
+            const el = document.getElementById(elementId);
+            if(el.innerText !== newValue) {
+                // Soft fade transition on value change
+                el.style.opacity = '0.3';
+                setTimeout(() => {
+                    el.innerText = newValue;
+                    el.style.opacity = '1';
+                }, 200);
+            }
+        }
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            if(distance < 0) return;
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            const secs = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+
+            updateCdNum("cd-days", days);
+            updateCdNum("cd-hours", hours);
+            updateCdNum("cd-mins", mins);
+            updateCdNum("cd-secs", secs);
+        }, 1000);
+    </script>
+</body>
+</html>

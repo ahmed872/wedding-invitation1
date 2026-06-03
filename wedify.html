@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber-Luxury Premiere | Wedify</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=JetBrains+Mono:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #030303;
+            --tech-white: #f5f5f5;
+            --tech-gray: #1a1a1a;
+            --accent-border: #333333;
+            --neon-glow: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--tech-white);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Typefaces */
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Typography overrides for luxury cyber feel */
+        h1, h2, h3, h4 { text-transform: uppercase; }
+        
+        /* Custom UI Elements */
+        .sharp-edge { border-radius: 0 !important; }
+        
+        /* Preloader */
+        #preloader {
+            position: fixed; inset: 0; z-index: 99999;
+            background: var(--bg-dark);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cyber-loader {
+            width: 100px; height: 1px; background: var(--accent-border);
+            position: relative; overflow: hidden;
+        }
+        .cyber-loader::after {
+            content: ''; position: absolute; top: 0; left: 0;
+            height: 100%; width: 30%; background: var(--tech-white);
+            animation: scan 1.5s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+        }
+
+        /* Cyber Ticket Intro */
+        #intro-screen {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--bg-dark);
+            display: flex; align-items: center; justify-content: center;
+            background-image: linear-gradient(var(--accent-border) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--accent-border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center;
+        }
+        
+        .cyber-ticket {
+            position: relative; width: 90%; max-width: 400px;
+            background: rgba(3, 3, 3, 0.9);
+            border: 1px solid var(--accent-border);
+            backdrop-filter: blur(10px);
+            display: flex; flex-direction: column;
+        }
+
+        .ticket-cutout { position: absolute; width: 20px; height: 20px; background: var(--bg-dark); border: 1px solid var(--accent-border); transform: rotate(45deg); z-index: 10; }
+        .cut-tl { top: -10px; left: -10px; border-right: none; border-bottom: none; }
+        .cut-tr { top: -10px; right: -10px; border-left: none; border-bottom: none; }
+        .cut-bl { bottom: -10px; left: -10px; border-right: none; border-top: none; }
+        .cut-br { bottom: -10px; right: -10px; border-left: none; border-top: none; }
+
+        .ticket-tear-line {
+            height: 1px; width: 100%; border-top: 1px dashed var(--accent-border);
+            position: relative; margin: 20px 0;
+        }
+
+        .btn-cyber {
+            background: transparent; color: var(--tech-white);
+            border: 1px solid var(--tech-white);
+            padding: 12px 30px; text-transform: uppercase;
+            font-size: 10px; letter-spacing: 0.3em;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: all 0.3s;
+        }
+        .btn-cyber::before {
+            content: ''; position: absolute; inset: 0;
+            background: var(--tech-white); transform: scaleX(0);
+            transform-origin: right; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: -1;
+        }
+        .btn-cyber:hover { color: var(--bg-dark); }
+        .btn-cyber:hover::before { transform: scaleX(1); transform-origin: left; }
+
+        /* Main Reveal Styles */
+        #main-content {
+            display: none; position: relative; z-index: 10;
+        }
+
+        /* Massive Background Ticker Overlay */
+        #bg-ticker-wrapper {
+            position: fixed; inset: 0; z-index: -1;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; pointer-events: none;
+        }
+        #bg-timer {
+            font-size: 18vw; font-weight: 100;
+            color: rgba(255, 255, 255, 0.03);
+            white-space: nowrap; line-height: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Audio Toggle */
+        .audio-btn {
+            position: fixed; bottom: 20px; right: 20px; z-index: 100;
+            width: 40px; height: 40px; border: 1px solid var(--accent-border);
+            background: rgba(3,3,3,0.8); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: border-color 0.3s;
+        }
+        .audio-btn:hover { border-color: var(--tech-white); }
+        .audio-btn svg { width: 14px; fill: var(--tech-white); }
+        .spin-slow { animation: spin 4s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* General layout utils for Cyber Editorial */
+        .editorial-image-wrap {
+            position: relative; overflow: hidden; border: 1px solid var(--accent-border);
+            padding: 4px; background: var(--bg-dark);
+        }
+        .editorial-image-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(100%) contrast(1.2); transition: filter 0.5s;
+        }
+        .editorial-image-wrap:hover img { filter: grayscale(0%) contrast(1); }
+
+        .diag-text { writing-mode: vertical-rl; transform: rotate(180deg); }
+    </style>
+</head>
+<body class="antialiased selection:bg-white selection:text-black">
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="flex flex-col items-center">
+            <div class="cyber-loader mb-4"></div>
+            <div class="text-[8px] uppercase tracking-[0.5em] text-[#666]" id="loading-text">System Initialization</div>
+        </div>
+    </div>
+
+    <!-- AUDIO PLAYER -->
+    <audio id="bg-audio" loop preload="auto"></audio>
+    <button class="audio-btn hidden" id="music-btn" title="Toggle Audio">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    </button>
+
+    <!-- CINEMA TICKET INTRO -->
+    <div id="intro-screen">
+        <div class="absolute top-10 text-[8px] tracking-[0.4em] text-[#555] uppercase">Secure Connection Established</div>
+        
+        <div class="cyber-ticket shadow-2xl p-6 md:p-10" id="ticket-wrapper">
+            <!-- decorative cuts -->
+            <div class="ticket-cutout cut-tl"></div><div class="ticket-cutout cut-tr"></div>
+            <div class="ticket-cutout cut-bl"></div><div class="ticket-cutout cut-br"></div>
+
+            <div id="ticket-top" class="text-center pb-4">
+                <p class="text-[8px] tracking-[0.3em] text-[#777] mb-6">PREMIERE AUTHORIZATION</p>
+                <h1 class="font-cinzel text-3xl md:text-5xl mb-2" id="t-groom">GROOM</h1>
+                <p class="font-mono text-sm text-[#444] my-2">&amp;</p>
+                <h1 class="font-cinzel text-3xl md:text-5xl mb-6" id="t-bride">BRIDE</h1>
+                <div class="w-full bg-[#111] py-2 px-4 flex justify-between items-center text-[9px] tracking-[0.2em] border border-[#222]">
+                    <span id="t-date">00.00.00</span>
+                    <span>VIP ACCESS</span>
+                </div>
+            </div>
+
+            <div class="ticket-tear-line relative flex justify-center items-center">
+                <button class="btn-cyber absolute bg-[--bg-dark]" id="admit-btn">Admit One</button>
+            </div>
+
+            <div id="ticket-bot" class="text-center pt-8">
+                <p class="text-[7px] tracking-[0.4em] text-[#555] mb-4 uppercase">Decrypting Experience</p>
+                <!-- minimal barcode -->
+                <div class="flex justify-center h-8 opacity-40">
+                    <div class="w-[2px] bg-white mx-[1px]"></div><div class="w-[4px] bg-white mx-[1px]"></div>
+                    <div class="w-[1px] bg-white mx-[2px]"></div><div class="w-[3px] bg-white mx-[1px]"></div>
+                    <div class="w-[1px] bg-white mx-[1px]"></div><div class="w-[5px] bg-white mx-[2px]"></div>
+                    <div class="w-[2px] bg-white mx-[1px]"></div><div class="w-[1px] bg-white mx-[1px]"></div>
+                    <div class="w-[3px] bg-white mx-[2px]"></div><div class="w-[2px] bg-white mx-[1px]"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN EXPERIENCE -->
+    <div id="main-content">
+        
+        <!-- MASSIVE BACKGROUND TIMER -->
+        <div id="bg-ticker-wrapper">
+            <div id="bg-timer" class="font-mono">00:00:00:00</div>
+        </div>
+
+        <!-- HERO: ASYMMETRIC SPLIT SCREEN -->
+        <section class="min-h-screen grid grid-cols-1 md:grid-cols-12 relative border-b border-[#222]">
+            
+            <!-- Left Tyopgraphy Column -->
+            <div id="main-hero-left" class="md:col-span-5 p-6 md:p-12 flex flex-col justify-center relative md:border-r border-[#222] bg-[--bg-dark] md:bg-transparent">
+                <div class="absolute top-10 left-10 text-[8px] tracking-[0.5em] text-[#444] diag-text hidden md:block">SYS.ACTIVE // <span id="h-date-side"></span></div>
+                
+                <h2 class="text-[9px] tracking-[0.4em] text-[#666] mb-8">SEQUENCE INITIATED</h2>
+                <h1 class="font-cinzel text-5xl md:text-7xl lg:text-8xl leading-none" id="h-groom">GROOM</h1>
+                <div class="h-px w-24 bg-[#333] my-6"></div>
+                <h1 class="font-cinzel text-5xl md:text-7xl lg:text-8xl leading-none text-[#999]" id="h-bride">BRIDE</h1>
+                
+                <div class="mt-12 text-[10px] tracking-[0.2em] leading-relaxed max-w-xs text-[#777]">
+                    A UNION FORGED IN TIME.<br>
+                    WE REQUEST YOUR PRESENCE AT THE PREMIERE EVENT.
+                </div>
+            </div>
+
+            <!-- Right Absolute Overlapping Layout -->
+            <div id="main-hero-right" class="md:col-span-7 relative h-[60vh] md:h-auto bg-[#050505]">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
+                
+                <!-- Main Image -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] editorial-image-wrap z-10 box-glow hover:z-30">
+                    <img id="img-hero-1" src="" alt="Hero 1">
+                    <div class="absolute bottom-4 right-4 bg-black border border-[#333] px-3 py-1 text-[8px] tracking-widest">FIG 1.0</div>
+                </div>
+
+                <!-- Secondary Overlapping Image -->
+                <div class="absolute bottom-10 left-4 md:left-10 w-[45%] h-[45%] editorial-image-wrap z-20 hover:z-30">
+                    <img id="img-hero-2" src="" alt="Hero 2">
+                    <div class="absolute top-4 left-4 bg-white text-black px-2 py-[2px] text-[8px] font-bold tracking-widest">/// AUTHENTIC</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EDITORIAL CARD LAYOUT (THE CAST / STORY) -->
+        <section class="py-24 md:py-32 px-4 md:px-12 relative bg-[--bg-dark] border-b border-[#222]">
+            <div class="max-w-7xl mx-auto">
+                
+                <div class="flex items-center gap-6 mb-16 md:mb-24">
+                    <h2 class="text-[10px] tracking-[0.5em] text-[#fff] uppercase">01 / The Cast</h2>
+                    <div class="h-px bg-[#333] flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-4 items-center">
+                    
+                    <!-- Groom Card -->
+                    <div class="md:col-span-5 relative group gs-reveal">
+                        <div class="editorial-image-wrap h-[400px] md:h-[600px] w-full">
+                            <img id="img-groom" src="" alt="Groom Setup">
+                        </div>
+                        <!-- Overlapping Text Block -->
+                        <div class="absolute -bottom-6 -right-2 md:-right-10 bg-black border border-[#333] p-6 w-[80%] z-20 transition-transform duration-500 group-hover:translate-x-2">
+                            <h3 class="font-cinzel text-3xl mb-1 text-white" id="c-groom-name">Groom</h3>
+                            <p class="text-[8px] tracking-[0.3em] text-[#666]">LEAD PROTAGONIST</p>
+                            <div class="w-full h-px bg-[#222] my-4"></div>
+                            <p class="text-[10px] text-[#888] leading-relaxed" id="c-groom-desc">Description</p>
+                        </div>
+                    </div>
+
+                    <!-- Center Junction -->
+                    <div class="md:col-span-2 flex justify-center py-10 md:py-0 gs-reveal">
+                        <div class="font-cinzel text-5xl md:text-7xl text-[#333] px-4 md:rotate-90 origin-center">&</div>
+                    </div>
+
+                    <!-- Bride Card -->
+                    <div class="md:col-span-5 relative group mt-10 md:mt-24 gs-reveal">
+                        <div class="editorial-image-wrap h-[400px] md:h-[600px] w-full">
+                            <img id="img-bride" src="" alt="Bride Setup">
+                        </div>
+                        <!-- Overlapping Text Block -->
+                        <div class="absolute -bottom-6 -left-2 md:-left-10 bg-black border border-[#333] p-6 w-[80%] z-20 transition-transform duration-500 group-hover:-translate-x-2 text-right">
+                            <h3 class="font-cinzel text-3xl mb-1 text-white" id="c-bride-name">Bride</h3>
+                            <p class="text-[8px] tracking-[0.3em] text-[#666]">LEAD PROTAGONIST</p>
+                            <div class="w-full h-px bg-[#222] my-4"></div>
+                            <p class="text-[10px] text-[#888] leading-relaxed" id="c-bride-desc">Description</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGGERED GRID GALLERY -->
+        <section class="py-24 md:py-32 px-4 md:px-12 bg-[#050505] border-b border-[#222]">
+            <div class="max-w-7xl mx-auto">
+                
+                <div class="flex items-center gap-6 mb-16 md:mb-24 flex-row-reverse">
+                    <h2 class="text-[10px] tracking-[0.5em] text-[#fff] uppercase">02 / Cinematic Frames</h2>
+                    <div class="h-px bg-[#333] flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div class="md:col-span-7 h-[300px] md:h-[500px] editorial-image-wrap gs-reveal">
+                        <img id="gal-1" src="" alt="Frame 1">
+                        <div class="absolute top-4 right-4 bg-[#111] px-2 py-1 text-[8px] tracking-widest border border-[#333]">#001</div>
+                    </div>
+                    
+                    <div class="md:col-span-5 md:mt-24 h-[250px] md:h-[400px] editorial-image-wrap gs-reveal">
+                        <img id="gal-2" src="" alt="Frame 2">
+                        <div class="absolute top-4 right-4 bg-[#111] px-2 py-1 text-[8px] tracking-widest border border-[#333]">#002</div>
+                    </div>
+                    
+                    <div class="md:col-span-12 md:col-span-4 mt-4 md:-mt-16 h-[300px] md:h-[450px] editorial-image-wrap gs-reveal">
+                        <img id="gal-3" src="" alt="Frame 3">
+                        <div class="absolute top-4 right-4 bg-[#111] px-2 py-1 text-[8px] tracking-widest border border-[#333]">#003</div>
+                    </div>
+
+                    <div class="md:col-span-12 md:col-span-8 mt-4 h-[300px] md:h-[550px] editorial-image-wrap gs-reveal">
+                        <img id="gal-4" src="" alt="Frame 4">
+                        <div class="absolute top-4 right-4 bg-[#111] px-2 py-1 text-[8px] tracking-widest border border-[#333]">#004</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- EVENT DETAILS & RSVP -->
+        <section class="py-24 md:py-32 px-4 md:px-12 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2000&auto=format&fit=crop');">
+            <div class="absolute inset-0 bg-[#030303]/90"></div>
+            
+            <div class="max-w-4xl mx-auto relative z-10 text-center">
+                <h2 class="text-[10px] tracking-[0.5em] text-[#777] uppercase mb-6 gs-reveal">03 / The Protocol</h2>
+                <h3 class="font-cinzel text-4xl md:text-6xl text-white mb-20 gs-reveal">Schedule & Access</h3>
+                
+                <div class="border border-[#333] bg-black p-8 md:p-14 relative overflow-hidden text-left gs-reveal">
+                    <!-- Abstract Tech Decor -->
+                    <div class="absolute top-0 right-0 w-32 h-32 border-l border-b border-[#222] opacity-50"></div>
+                    <div class="absolute bottom-4 right-4 text-[60px] font-cinzel text-[#111] font-bold leading-none pointer-events-none">A/E</div>
+
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <!-- Location Detail -->
+                        <div>
+                            <p class="text-[8px] tracking-[0.3em] text-[#666] mb-2 uppercase">Coordinates</p>
+                            <h4 class="font-cinzel text-2xl text-white mb-4" id="e-location">Site Location</h4>
+                            <p class="text-[11px] text-[#888] leading-relaxed mb-6" id="e-address">
+                                Street Address details showing precise coordinates.
+                            </p>
+                            <a id="btn-map" href="#" target="_blank" class="btn-cyber inline-block">Extract Map</a>
+                        </div>
+                        
+                        <!-- Timeline Detail -->
+                        <div>
+                            <p class="text-[8px] tracking-[0.3em] text-[#666] mb-2 uppercase">Timeline</p>
+                            <h4 class="font-cinzel text-2xl text-white mb-4">Commencement</h4>
+                            <ul class="text-[10px] text-[#888] space-y-4 mb-8">
+                                <li class="flex justify-between border-b border-[#222] pb-2">
+                                    <span>GUESTS ARRIVAL</span><span id="e-time-1" class="text-white">16:00</span>
+                                </li>
+                                <li class="flex justify-between border-b border-[#222] pb-2">
+                                    <span>CEREMONY BEGINS</span><span id="e-time-2" class="text-white">16:30</span>
+                                </li>
+                                <li class="flex justify-between border-b border-[#222] pb-2">
+                                    <span>RECEPTION PROTOCOL</span><span id="e-time-3" class="text-white">19:30</span>
+                                </li>
+                            </ul>
+                            
+                            <a id="btn-rsvp" href="#" target="_blank" class="btn-cyber inline-block bg-white !text-black border-white hover:bg-transparent hover:!text-white">Confirm RSVP</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-16 text-center bg-black border-t border-[#222]">
+            <p class="text-[8px] tracking-[0.5em] text-[#444] uppercase">End of Sequence</p>
+            <div class="w-px h-8 bg-[#333] mx-auto my-6"></div>
+            <p class="font-cinzel text-sm text-[#666]">W E D I F Y   S T U D I O S</p>
+        </footer>
+
+    </div>
+
+    <!-- MAIN CONFIGURATION & LOGIC -->
+    <script>
+        /**
+         * ==============================================
+         * 1. WEDDING CONFIGURATION OBJECT
+         * ==============================================
+         */
+        const WEDDING_CONFIG = {
+            groom: "Alexander",
+            bride: "Elena",
+            groomDesc: "Architect of logical structures and modern minimalist spaces. Enjoys precision, quiet mornings, and a perfect espresso.",
+            brideDesc: "Creative director bridging the gap between art and technology. Thrives on chaotic creativity, late-night designs, and brutalist architecture.",
+            
+            // Format: YYYY-MM-DDTHH:mm:ss
+            date: "2024-10-25T16:30:00",
+            displayDate: "OCT 25 // 2024",
+            
+            locationName: "St. Patrick's Cathedral",
+            locationAddress: "5th Avenue & 50th Street<br>New York, NY 10022<br><br>ATTIRE: Formal / Dark Palette preferred.",
+            mapLink: "https://maps.google.com/?q=St.+Patrick's+Cathedral+NY",
+            
+            timeArrival: "16:00",
+            timeCeremony: "16:30",
+            timeReception: "19:30",
+            
+            whatsappRsvpLink: "https://wa.me/1234567890?text=I%20confirm%20my%20attendance%20for%20the%20wedding%20premiere.",
+            
+            audioSrc: "https://assets.mixkit.co/music/preview/mixkit-beautiful-dream-493.mp3",
+            
+            // Imagery
+            imgHero1: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000",
+            imgHero2: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800",
+            imgGroom: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800",
+            imgBride: "https://images.unsplash.com/photo-1541250848049-b4f71426ca91?q=80&w=800",
+            imgGal1: "https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1000",
+            imgGal2: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800",
+            imgGal3: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=800",
+            imgGal4: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200",
+        };
+
+        /**
+         * ==============================================
+         * 2. INITIALIZATION & DOM POPULATION
+         * ==============================================
+         */
+        window.addEventListener('DOMContentLoaded', () => {
+            // Populate DOM with Config
+            document.getElementById('t-groom').textContent = WEDDING_CONFIG.groom;
+            document.getElementById('t-bride').textContent = WEDDING_CONFIG.bride;
+            document.getElementById('t-date').textContent = WEDDING_CONFIG.displayDate;
+            
+            document.getElementById('h-groom').textContent = WEDDING_CONFIG.groom;
+            document.getElementById('h-bride').textContent = WEDDING_CONFIG.bride;
+            document.getElementById('h-date-side').textContent = WEDDING_CONFIG.displayDate;
+            
+            document.getElementById('c-groom-name').textContent = WEDDING_CONFIG.groom;
+            document.getElementById('c-bride-name').textContent = WEDDING_CONFIG.bride;
+            document.getElementById('c-groom-desc').textContent = WEDDING_CONFIG.groomDesc;
+            document.getElementById('c-bride-desc').innerHTML = WEDDING_CONFIG.brideDesc;
+
+            document.getElementById('e-location').textContent = WEDDING_CONFIG.locationName;
+            document.getElementById('e-address').innerHTML = WEDDING_CONFIG.locationAddress;
+            document.getElementById('btn-map').href = WEDDING_CONFIG.mapLink;
+            document.getElementById('btn-rsvp').href = WEDDING_CONFIG.whatsappRsvpLink;
+            
+            document.getElementById('e-time-1').textContent = WEDDING_CONFIG.timeArrival;
+            document.getElementById('e-time-2').textContent = WEDDING_CONFIG.timeCeremony;
+            document.getElementById('e-time-3').textContent = WEDDING_CONFIG.timeReception;
+
+            document.getElementById('img-hero-1').src = WEDDING_CONFIG.imgHero1;
+            document.getElementById('img-hero-2').src = WEDDING_CONFIG.imgHero2;
+            document.getElementById('img-groom').src = WEDDING_CONFIG.imgGroom;
+            document.getElementById('img-bride').src = WEDDING_CONFIG.imgBride;
+            document.getElementById('gal-1').src = WEDDING_CONFIG.imgGal1;
+            document.getElementById('gal-2').src = WEDDING_CONFIG.imgGal2;
+            document.getElementById('gal-3').src = WEDDING_CONFIG.imgGal3;
+            document.getElementById('gal-4').src = WEDDING_CONFIG.imgGal4;
+
+            document.getElementById('bg-audio').src = WEDDING_CONFIG.audioSrc;
+        });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                gsap.to(preloader, { opacity: 0, duration: 0.8, onComplete: () => preloader.style.display = 'none' });
+            }, 1000);
+        });
+
+        /**
+         * ==============================================
+         * 3. BACKGROUND TICKER (COUNTDOWN) LOGIC
+         * ==============================================
+         */
+        const targetTime = new Date(WEDDING_CONFIG.date).getTime();
+        const timerEl = document.getElementById('bg-timer');
+        
+        setInterval(() => {
+            const distance = targetTime - new Date().getTime();
+            if(distance < 0) {
+                timerEl.innerText = "00:00:00:00";
+                return;
+            }
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            const s = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+            
+            timerEl.innerText = `${d}:${h}:${m}:${s}`;
+        }, 1000);
+
+        /**
+         * ==============================================
+         * 4. AGGRESSIVE GSAP ANIMATIONS & TEAR LOGIC
+         * ==============================================
+         */
+        let isRevealed = false;
+        
+        document.getElementById('admit-btn').addEventListener('click', () => {
+            if(isRevealed) return;
+            isRevealed = true;
+            
+            // Audio Play
+            const audio = document.getElementById('bg-audio');
+            audio.volume = 0.4;
+            audio.play().catch(e => console.log('Autoplay issue:', e));
+            
+            const mBtn = document.getElementById('music-btn');
+            mBtn.classList.remove('hidden');
+            mBtn.querySelector('svg').classList.add('spin-slow');
+
+            const tl = gsap.timeline();
+            
+            // 1. Ticket Tear
+            tl.to('#admit-btn', { scale: 0, opacity: 0, duration: 0.3 })
+              .to('.ticket-tear-line', { opacity: 0, duration: 0.1 })
+              .to('#ticket-top', { y: '-100vh', rotation: -5, duration: 1.2, ease: 'cubic-bezier(0.16, 1, 0.3, 1)'}, "tear")
+              .to('#ticket-bot', { y: '100vh', rotation: 5, duration: 1.2, ease: 'cubic-bezier(0.16, 1, 0.3, 1)'}, "tear")
+              
+              // 2. Intro Screen Scale Out
+              .to('#intro-screen', { scale: 1.5, opacity: 0, duration: 1.2, ease: 'power2.inOut'}, "tear+=0.2")
+              .call(() => {
+                  document.getElementById('intro-screen').style.display = 'none';
+                  document.getElementById('main-content').style.display = 'block';
+              })
+              
+              // 3. Main Content Reveal (Aggressive Slide)
+              .fromTo('#main-hero-left', 
+                  { x: '-100%', opacity: 0 }, 
+                  { x: '0%', opacity: 1, duration: 1.4, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' }, "reveal")
+              .fromTo('#main-hero-right', 
+                  { x: '100%', opacity: 0 }, 
+                  { x: '0%', opacity: 1, duration: 1.4, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' }, "reveal")
+              
+              // 4. Background Ticker Fade In
+              .fromTo('#bg-timer', 
+                  { opacity: 0, scale: 0.8 }, 
+                  { opacity: 1, scale: 1, duration: 2, ease: 'power2.out' }, "reveal+=0.5")
+              
+              .call(() => initScrollAnimations());
+        });
+
+        /**
+         * ==============================================
+         * 5. SCROLL ANIMATIONS
+         * ==============================================
+         */
+        function initScrollAnimations() {
+            const elements = document.querySelectorAll('.gs-reveal');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        gsap.fromTo(entry.target, 
+                            { y: 50, opacity: 0 }, 
+                            { y: 0, opacity: 1, duration: 1.2, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+            elements.forEach(el => observer.observe(el));
+        }
+
+        /**
+         * ==============================================
+         * 6. AUDIO CONTROL TOGGLE
+         * ==============================================
+         */
+        document.getElementById('music-btn').addEventListener('click', function() {
+            const audio = document.getElementById('bg-audio');
+            const svg = this.querySelector('svg');
+            if(audio.paused) {
+                audio.play();
+                svg.classList.add('spin-slow');
+                this.style.borderColor = "var(--tech-white)";
+            } else {
+                audio.pause();
+                svg.classList.remove('spin-slow');
+                this.style.borderColor = "var(--accent-border)";
+            }
+        });
+    </script>
+</body>
+</html>
