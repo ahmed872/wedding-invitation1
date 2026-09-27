@@ -537,8 +537,8 @@ const CONFIG = {
   mapUrl: 'https://maps.app.goo.gl/EEt64MRmruJoFWm3A',
   // WhatsApp number for RSVP in international format, digits only (e.g. '201001234567'). Leave '' to hide the button.
   whatsapp: '201019576748',
-  // Background music file (e.g. 'music.mp3' placed next to this page). Leave '' to hide the music button.
-  music: ''
+  // Background music: upload the song as music.mp3 next to this page. If the file is missing, the music button stays hidden.
+  music: 'music.mp3'
 };
 
 (() => {
@@ -736,8 +736,11 @@ const CONFIG = {
   const musicBtn = $('#musicBtn');
   let audio = null;
   if (CONFIG.music) {
-    audio = new Audio(CONFIG.music); audio.loop = true; audio.volume = .6;
+    audio = new Audio(); audio.loop = true; audio.volume = .6; audio.preload = 'auto';
+    audio.addEventListener('error', () => { audio = null; musicBtn.classList.remove('show', 'playing'); });
+    audio.src = CONFIG.music;
     musicBtn.addEventListener('click', () => {
+      if (!audio) return;
       if (audio.paused) { audio.play().catch(() => {}); musicBtn.classList.add('playing'); }
       else { audio.pause(); musicBtn.classList.remove('playing'); }
     });
