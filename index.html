@@ -374,6 +374,15 @@
   footer .fm { font-size: 30px; letter-spacing: .12em; color: var(--sage); }
   footer .fm i { display: inline-block; width: 1px; height: .9em; background: var(--sage); margin: 0 .35em; vertical-align: -3px; }
   footer .fd { font-size: 12px; letter-spacing: .5em; margin-top: 6px; color: var(--sage-2); padding-left: .5em; }
+  footer .credit {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 40px; padding: 8px 16px;
+    border: 1px solid rgba(173,135,67,.35); border-radius: 999px;
+    font-size: 13px; letter-spacing: .14em; color: var(--sage-2); text-decoration: none;
+    transition: color .3s, border-color .3s, background .3s;
+  }
+  footer .credit svg { width: 16px; height: 16px; flex: none; }
+  footer .credit b { font-weight: 600; color: var(--wine); letter-spacing: .06em; font-variant-numeric: lining-nums; font-feature-settings: "lnum" 1; }
+  footer .credit:hover { color: var(--sage); border-color: var(--line); background: rgba(173,135,67,.06); }
   footer .love { font-family: var(--script); font-size: clamp(24px, 6.6vw, 32px); text-wrap: balance; color: var(--wine); margin-top: 14px; }
 
   /* Music */
@@ -552,6 +561,10 @@
     <div class="fm reveal">M<i></i>N</div>
     <div class="fd reveal" style="--i:1">09 · 10 · 2026</div>
     <div class="love reveal" style="--i:2">with love, Mohamed &amp; Nayira</div>
+    <a class="credit reveal" style="--i:3" href="https://www.instagram.com/weddify_1/" target="_blank" rel="noopener" aria-label="Designed by Weddify on Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/></svg>
+      <span>Designed by <b>@weddify_1</b></span>
+    </a>
   </footer>
 </main>
 
